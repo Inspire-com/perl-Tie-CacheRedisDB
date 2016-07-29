@@ -3,16 +3,25 @@ use warnings;
 
 use Test::FailWarnings;
 use Test::Most;
+use Test::RedisDB;
 
 use Tie::CacheRedisDB;
+
+my $server = Test::RedisDB->new;
+plan(skip_all => 'Could not start test redis-server') unless $server;
+
+my $former_val = $ENV{'REDIS_CACHE_SERVER'};
+$ENV{'REDIS_CACHE_SERVER'} = $server->host . ':' . $server->port;
 
 subtest 'constructor' => sub {
 
     my %test;
 
-    throws_ok { tie %test, 'Tie::CacheRedisDB'; } qr/supply a lookup/, 'Need to supply a key for Redis';
+    throws_ok { tie %test, 'Tie::CacheRedisDB'; } qr/supply a lookup/,
+      'Need to supply a key for Redis';
     lives_ok { tie %test, 'Tie::CacheRedisDB', 'dakey'; } 'Solitary key is ok';
-    throws_ok { tie %test, 'Tie::CacheRedisDB', 'dakey', []; } qr/supplied as a hash/, 'Need to supply args in a hash reference';
+    throws_ok { tie %test, 'Tie::CacheRedisDB', 'dakey', []; }
+    qr/supplied as a hash/, 'Need to supply args in a hash reference';
 
 };
 
@@ -35,5 +44,8 @@ subtest 'defaults' => sub {
         lives_ok { tied(%otest)->delete } 'Deletes';
     }
 };
+
+# Try to leave the environment unmangled, if possible.
+$ENV{'REDIS_CACHE_SERVER'} = $former_val;
 
 done_testing;
