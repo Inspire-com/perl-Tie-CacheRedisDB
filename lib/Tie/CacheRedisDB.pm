@@ -3,7 +3,7 @@ package Tie::CacheRedisDB;
 use strict;
 use warnings;
 use 5.010;
-our $VERSION = '1.0.0';
+our $VERSION = '1.0.1';
 
 use Carp qw(croak);
 use Scalar::Util qw(reftype);
